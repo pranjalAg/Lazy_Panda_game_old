@@ -43,13 +43,14 @@
             update: update
         }
     };
-    var platforms1;
+    var platforms;
     var player;
     var cursors;
     var stones;
     var bamboos;
     var lavas;
-    var platforms2;
+    var platformsm
+    
 
     var game = new Phaser.Game(config);
  /*calling resize function*/   
@@ -67,6 +68,7 @@
         this.load.image('stone', 'panda/stone.png');
         this.load.image('food', 'panda/food.png');
         this.load.image('lava', 'panda/lava.png');
+        this.load.image('groundsm', 'panda/groundsm.png');
         this.load.spritesheet('panda', 'panda/panda.png', {frameWidth: 70, frameHeight: 100 });
     }
 
@@ -92,22 +94,30 @@
         player.setCollideWorldBounds(true);
     /*----player is created is a collidable object----*/
    /*use physics for platform/ground to make them static objects which can interact with other object*/
-        platforms1 = this.physics.add.staticGroup();
-        platforms1.create(-300, 760, 'ground');
-        platforms2 = this.physics.add.staticGroup();
-        platforms2.create(1500, 760, 'ground');
+        platforms = this.physics.add.staticGroup();
+        platforms.create(-300, 760, 'ground');
+        platforms.create(1500, 760, 'ground');
+        //platforms.create(1200, 580, 'ground').setScale(0.3).refreshBody()
+        platformsm = this.physics.add.staticGroup();
+        platformsm.create(1200, 580, 'groundsm').setScale(0.3).refreshBody();
+        platformsm.create(800, 450, 'groundsm').setScale(0.3).refreshBody();
     /*----Platform is created----*/
     	lavas = this.physics.add.staticGroup();
-        lavas.create(600, 760, 'lava');
+        lavas.create(600, 780, 'lava');
     	
     /*creating a stone as object*/
     	stones = this.physics.add.staticGroup();
-    	stones.create(300, 690, 'stone');
+    	stones.create(300, 693, 'stone');
     /*Stone creation END here*/	
-    	bamboos = this.physics.add.staticGroup();
+    	bamboos = this.physics.add.staticGroup(); 	
     	bamboos.create(300, 550, 'food');
+    	bamboos.create(600, 500, 'food');
+    	bamboos.create(1200, 670, 'food');
+    	bamboos.create(1800, 500, 'food');
+    	bamboos.create(1200, 400, 'food');
+
     
-    this.anims.create({
+    	this.anims.create({
             key: 'left',
             frames: this.anims.generateFrameNumbers('panda', { start: 0, end: 3 }),
             frameRate: 10,
@@ -128,9 +138,11 @@
         });
   		cursors = this.input.keyboard.createCursorKeys();
     /*----Make the player collide with ground/platform----*/
-        this.physics.add.collider(platforms1, player);
-        this.physics.add.collider(platforms2, player);
+        this.physics.add.collider(platforms, player);
         this.physics.add.collider(stones, player);
+        this.physics.add.collider(lavas, player);
+        this.physics.add.collider(platformsm, player);
+        this.physics.add.overlap(player, bamboos, collectfood, null, this);
     }
 
     function update ()
@@ -156,8 +168,13 @@
 
         if (cursors.up.isDown && player.body.touching.down)
         {
-            player.setVelocityY(-800);
+            player.setVelocityY(-750);
         }
+    }
+
+    function collectfood(player, food)
+    {
+    	food.disableBody(true, true)
     }
  /*creating function for making browser window responsive*/   
    function resize() {
