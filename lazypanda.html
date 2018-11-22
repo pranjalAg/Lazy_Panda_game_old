@@ -13,9 +13,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+         }   	
 
-
-        }
+       
         h1{
         	text-align: center;
         	text-decoration: strong;
@@ -48,8 +48,17 @@
     var cursors;
     var stones;
     var bamboos;
-    var lavas;
-    var platformsm
+    var lavas1;
+    var platformsm1;
+    var platformsm2;
+    var gameOver= false;
+    var score = 0;
+    var scoreText;
+    var endText;
+    var win;
+    var keys;
+    var lavas2;
+
     
 
     var game = new Phaser.Game(config);
@@ -63,19 +72,23 @@
     {
         this.load.image('background', 'panda/background.jpg');
         this.load.image('ground', 'panda/ground.png');
-        this.load.image('sun', 'panda/sun.png');
+        this.load.image('sun1', 'panda/sun1.png');
         this.load.image('cloud', 'panda/cloud.png');
         this.load.image('stone', 'panda/stone.png');
-        this.load.image('food', 'panda/food.png');
+        this.load.image('apple', 'panda/apple.png');
+        //this.load.image('food', 'panda/food.png');
+        this.load.image('key', 'panda/key.png');
         this.load.image('lava', 'panda/lava.png');
+        this.load.image('gameover', 'panda/gameover.png');
         this.load.image('groundsm', 'panda/groundsm.png');
+        this.load.image('win', 'panda/win.png');
         this.load.spritesheet('panda', 'panda/panda.png', {frameWidth: 70, frameHeight: 100 });
     }
 
     function create ()
     {
         this.add.image(800, 400, 'background');
-        this.add.image(1400, 160, 'sun');
+        this.add.image(1400, 160, 'sun1');
     /*adding clouds at different location*/    
         this.add.image(0, 80, 'cloud');
         this.add.image(200, 140, 'cloud');
@@ -98,23 +111,26 @@
         platforms.create(-300, 760, 'ground');
         platforms.create(1500, 760, 'ground');
         //platforms.create(1200, 580, 'ground').setScale(0.3).refreshBody()
-        platformsm = this.physics.add.staticGroup();
-        platformsm.create(1200, 580, 'groundsm').setScale(0.3).refreshBody();
-        platformsm.create(800, 450, 'groundsm').setScale(0.3).refreshBody();
+        platformsm1 = this.physics.add.staticGroup();
+        platformsm1.create(1200, 580, 'groundsm').setScale(0.3).refreshBody();
+        platformsm2 = this.physics.add.staticGroup();
+        platformsm2.create(830, 430, 'groundsm').setScale(0.3).refreshBody();
     /*----Platform is created----*/
-    	lavas = this.physics.add.staticGroup();
-        lavas.create(600, 780, 'lava');
+    	lavas1 = this.physics.add.staticGroup();
+        lavas1.create(600, 780, 'lava');
     	
     /*creating a stone as object*/
     	stones = this.physics.add.staticGroup();
     	stones.create(300, 693, 'stone');
     /*Stone creation END here*/	
     	bamboos = this.physics.add.staticGroup(); 	
-    	bamboos.create(300, 550, 'food');
-    	bamboos.create(600, 500, 'food');
-    	bamboos.create(1200, 670, 'food');
-    	bamboos.create(1800, 500, 'food');
-    	bamboos.create(1200, 400, 'food');
+    	bamboos.create(300, 550, 'apple');
+    	bamboos.create(600, 500, 'apple');
+    	bamboos.create(1200, 670, 'apple');
+    	bamboos.create(1800, 500, 'apple');
+    	bamboos.create(1200, 400, 'apple');
+
+    	lavas2 = this.physics.add.staticGroup();
 
     
     	this.anims.create({
@@ -137,25 +153,35 @@
             repeat: -1
         });
   		cursors = this.input.keyboard.createCursorKeys();
+  		scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '36px', fill: '#000' });
+  		
     /*----Make the player collide with ground/platform----*/
         this.physics.add.collider(platforms, player);
         this.physics.add.collider(stones, player);
-        this.physics.add.collider(lavas, player);
-        this.physics.add.collider(platformsm, player);
+        this.physics.add.collider(platformsm1, player);
+        this.physics.add.collider(platformsm2, player, showkey, null, this);
         this.physics.add.overlap(player, bamboos, collectfood, null, this);
+        //this.physics.add.overlap(player, keys, );
+        this.physics.add.collider(player, lavas1, burn, null, this);
+        this.physics.add.collider(player, lavas2, burn, null, this);
+                
     }
 
     function update ()
     {
+    	if (gameOver)
+    	{
+        	return;
+    	}
     	if (cursors.left.isDown)
         {
-            player.setVelocityX(-260);
+            player.setVelocityX(-300);
 
             player.anims.play('left', true);
         }
         else if (cursors.right.isDown)
         {
-            player.setVelocityX(260);
+            player.setVelocityX(300);
 
             player.anims.play('right', true);
         }
@@ -170,12 +196,41 @@
         {
             player.setVelocityY(-750);
         }
+   		
     }
 
-    function collectfood(player, food)
+    function collectfood(player, apple)
     {
-    	food.disableBody(true, true)
+    	apple.disableBody(true, true)
+    	score=score+10;
+    	scoreText.setText('score: ' + score);
+
+    	if(score==50)
+    	{
+    		this.add.image(940, 350, 'win');
+			this.physics.pause();
+    		player.setTint(0x008000);
+    		player.anims.play('turn');
+    		gameOver = true;
+    	}
     }
+    function burn(player, lava){
+    	this.physics.pause();
+    	player.setTint(0xff0000);
+    	player.anims.play('turn', false);	
+    	gameOver = true;
+    	this.add.image(940, 350, 'gameover');
+    }
+   
+    function showkey(player, groundsm)
+    {
+    	keys = this.physics.add.staticGroup(); 	
+    	keys.create(580, 250, 'key');
+        
+
+
+    }
+
  /*creating function for making browser window responsive*/   
    function resize() {
     var canvas = document.querySelector("canvas");
