@@ -62,6 +62,7 @@
     var platformsm3;
     var doors;
     var msgtext;
+    var doortext;
 
     
 
@@ -82,13 +83,21 @@
         this.load.image('apple', 'panda/apple.png');
         //this.load.image('food', 'panda/food.png');
         this.load.image('pass', 'panda/pass.png');
-        this.load.image('door', 'panda/door.png');
+        //this.load.image('door', 'panda/doork.png');
         this.load.image('lava', 'panda/lava.png');
         this.load.image('lava2', 'panda/lava2.png');
         this.load.image('gameover', 'panda/gameover.png');
         this.load.image('groundsm', 'panda/groundsm.png');
         this.load.image('win', 'panda/win.png');
         this.load.spritesheet('panda', 'panda/panda.png', {frameWidth: 70, frameHeight: 100 });
+        this.load.audio('jump', 'panda/jump4.mp3');
+        this.load.audio('collect', 'panda/collect.mp3');
+        //this.load.spritesheet('doorstripe', 'panda/doorstripe.png', {frameWidth: 110, frameHeight: 148 });
+        this.load.audio('gameov', 'panda/gameov.mp3');
+        this.load.audio('gov1', 'panda/gov1.mp3');
+        this.load.audio('col1', 'panda/col1.mp3');
+        this.load.image('doorc', 'panda/doorc.png');
+        this.load.image('dooro', 'panda/dooro.png');
     }
 
     function create ()
@@ -125,6 +134,9 @@
         
 
     /*----Platform is created----*/
+    	
+    	
+
     	lavas1 = this.physics.add.staticGroup();
         lavas1.create(600, 780, 'lava');
     	
@@ -141,9 +153,19 @@
 
     	lavas2 = this.physics.add.staticGroup();
     	keys = this.physics.add.staticGroup();
+    	doorsc = this.physics.add.staticGroup();
+    	doorso = this.physics.add.staticGroup();
 
-    	doors = this.physics.add.staticGroup();
-    
+    	//doors = this.physics.add.staticGroup();
+
+    	//let soundjump = this.add.sound('jump');
+    	//soundjump.play();
+    	this.sound.add('jump');
+    	this.sound.add('collect');
+    	this.sound.add('gameov');
+    	this.sound.add('gov1');
+    	this.sound.add('col1');
+
     	this.anims.create({
             key: 'left',
             frames: this.anims.generateFrameNumbers('panda', { start: 0, end: 3 }),
@@ -165,22 +187,26 @@
         });
   		cursors = this.input.keyboard.createCursorKeys();
   		scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '36px', fill: '#000' });
-  		chabiText = this.add.text(16, 46, 'chabi: 0' , {fontSize: '36px', fill: '#000'});
-  		
+  		//chabiText = this.add.text(16, 46, 'chabi: 0' , {fontSize: '36px', fill: '#000'});
+  		doortext = this.add.text(900, 350, '', {fontSize: '36px', fill: '#000'});
     /*----Make the player collide with ground/platform----*/
         
 
         this.physics.add.collider(platforms, player);
         this.physics.add.collider(stones, player);
         this.physics.add.collider(platformsm1, player);
-        this.physics.add.collider(platformsm2, player, showkey, null, this);
+        this.physics.add.collider(platformsm2, player, showkey, null, this).name = 'plat';
         this.physics.add.collider(platformsm3, player);
         this.physics.add.overlap(player, bamboos, collectfood, null, this);
-        //this.physics.add.overlap(player, keys, );
         this.physics.add.collider(player, lavas1, burn, null, this);
         this.physics.add.collider(player, lavas2, burn, null, this);
-        this.physics.add.collider(player, doors, win, null, this);
+        //this.physics.add.collider(player, doors, win, null, this);
         this.physics.add.overlap(player, keys, lavacreate, null, this);
+        
+        this.physics.add.collider(platforms, doorsc);
+        this.physics.add.collider(player, doorsc).name = 'doclose';
+        this.physics.add.collider(platforms, doorso);
+        this.physics.add.collider(player, doorso, win, null, this);
         
 
     }
@@ -212,25 +238,36 @@
 
         if (cursors.up.isDown && player.body.touching.down)
         {
+           	this.sound.play('jump');   
             player.setVelocityY(-750);
         }
-   		
+   		if(score==50)
+   		{
+   			/*doors = this.physics.add.sprite(1870,640,'doorstripe');
+    		doors.setCollideWorldBounds(true);
+    		this.physics.add.collider(platforms, doors);*/
+   			doortext.setText('find and collect key');
+   			dclose();
+   			
+   		}
+    	if(score==70)
+    	{
+    		this.physics.world.colliders.remove(this.physics.world.colliders.getActive().find(function(i){
+            		return i.name == 'doclose'
+        			}));
+    		tremove();
+    		dopen();
+    	}
     }
-
+   
+    
     function collectfood(player, apple)
     {
     	apple.disableBody(true, true)
     	score=score+10;
     	scoreText.setText('score: ' + score);
+    	this.sound.play('collect');
 
-    	/*if(score==50)
-    	{
-    		this.add.image(940, 350, 'win');
-			this.physics.pause();
-    		player.setTint(0x008000);
-    		player.anims.play('turn');
-    		gameOver = true;
-    	}*/
     }
     function burn(player, lava){
     	this.physics.pause();
@@ -238,6 +275,7 @@
     	player.anims.play('turn', false);	
     	gameOver = true;
     	this.add.image(940, 350, 'gameover');
+    	this.sound.play('gameov');
     }
     
     function showkey(player, groundsm)
@@ -247,26 +285,30 @@
         
         lavas2.create(470, 740, 'lava2');
         lavas2.create(50, 740, 'lava2');
-       
+        lavas2.create(900, 740, 'lava2');
+    	lavas2.create(1200, 740, 'lava2');
+    	lavas2.create(1320, 740, 'lava2');
+    	platformsm3.create(830, 430, 'groundsm').setScale(0.3).refreshBody();
+    	this.physics.world.colliders.remove(this.physics.world.colliders.getActive().find(function(i){
+            		return i.name == 'plat'
+        			}));
+
     }
 
 	function lavacreate(player, pass)
-    {
+    {	//this.sound.play('collect');
+    	//var count = 0;
     	pass.disableBody(true, true);
     	//count = ++count;
-    	var count = 0;
-    	chabiText.setText('chabi:' + ++count);
+    	score = score+20;
+    	scoreText.setText('score:' + score);
+    	//chabiText.setText('chabi:' + ++count);
 
-    	platformsm3.create(830, 430, 'groundsm').setScale(0.35).refreshBody();
-    	platformsm3.create(1200, 580, 'groundsm').setScale(0.35).refreshBody();
-
-    	lavas2.create(900, 740, 'lava2');
-    	lavas2.create(1200, 740, 'lava2');
-    	lavas2.create(1320, 740, 'lava2');
-
-    	if(count==1 && score==50)
-    		{doors.create(1870,670, 'door');
-    		}
+    	if(score==70)
+    		{//{doors.create(1870,650, 'door');
+    		
+    		this.sound.play('collect');		
+    		}	
     	else
     		{
     		this.physics.pause();
@@ -275,21 +317,37 @@
     		gameOver = true;
     		this.add.image(940, 350, 'gameover');
     		msgText = this.add.text(700, 450, 'Collect all apples first', { fontSize: '36px', fill: '#000' });
-    	  	}
-    	/*if(count == 1 && this.physics.add.collider(platforms, player))
-    	{
-    		pass.disableBody(true, true);
-    		break;
-    	}*/
-    	
+    		this.sound.play('gov1');
+    		}
+    	    	
     }
+    
+    function tremove()
+    {
+    	doortext.destroy();
+    }
+    
+    function dclose()
+    {
+    	doorsc.create(1870, 640, 'doorc');
+     	//this.physics.add.collider(platforms, doors);
+    }
+
+    function dopen()
+    {
+    	doorso.create(1870, 640, 'dooro');
+    	
+    	//doorsc.destroy();
+    }
+
     function win()
     {
-			this.physics.pause();
+			//this.physics.pause();
     		player.setTint(0x008000);
     		player.anims.play('turn');
-    		gameOver = true;
-    		this.add.image(940, 350, 'win');
+    		//gameOver = true;
+    		//this.add.image(940, 350, 'win');
+    		window.location.replace("level2.html");
     }
  /*creating function for making browser window responsive*/   
    function resize() {
