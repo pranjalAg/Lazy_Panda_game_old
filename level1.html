@@ -79,6 +79,57 @@
 /*-------loading assets--------*/ 
     function preload ()
     {           
+    /*----------Loading Bar-----------*/
+        var progressBar = this.add.graphics();
+        var progressBox = this.add.graphics();
+            progressBox.fillStyle(0x222222, 0.8);
+            progressBox.fillRect(860, 370, 320, 50);
+            
+        var width = this.cameras.main.width;
+        var height = this.cameras.main.height;
+        var loadingText = this.make.text({
+                x: width / 2,
+                y: height / 2 - 50,
+                text: 'Loading...',
+                style: {
+                    font: '20px monospace',
+                    fill: '#ffffff'
+                }
+            });
+            loadingText.setOrigin(0.5, 0.5);
+            
+        var percentText = this.make.text({
+                x: width / 2,
+                y: height / 2 - 5,
+                text: '0%',
+                style: {
+                    font: '18px monospace',
+                    fill: '#ffffff'
+                }
+            });
+            percentText.setOrigin(0.5, 0.5);
+            
+            
+            
+        this.load.on('progress', function (value) {
+                percentText.setText(parseInt(value * 100) + '%');
+                progressBar.clear();
+                progressBar.fillStyle(0xffffff, 1);
+                progressBar.fillRect(870, 380, 300 * value, 30);
+            });
+            
+            
+
+        this.load.on('complete', function () {
+                progressBar.destroy();
+                progressBox.destroy();
+                loadingText.destroy();
+                percentText.destroy();
+                
+            });   
+    /*#################################*/
+
+
         this.load.image('background', 'panda/level1/background.jpg');
         this.load.image('ground', 'panda/level1/ground.png');
         this.load.image('sun1', 'panda/level1/sun1.png');
@@ -92,6 +143,7 @@
         this.load.image('groundsm', 'panda/level1/groundsm.png');
         this.load.image('win', 'panda/level1/win.png');
         this.load.spritesheet('pandapx', 'panda/level1/pandapx.png', {frameWidth: 70, frameHeight: 100 });
+        this.load.spritesheet('startBtn', 'panda/level2/startBtn.png', {frameWidth: 60, frameHeight: 60 });
         this.load.audio('jump', 'panda/level1/jump4.mp3');
         this.load.audio('collect', 'panda/level1/collect.mp3');        
         this.load.audio('gameov', 'panda/level1/gameov.mp3');
@@ -290,6 +342,9 @@
     	gameOver = true;
     	this.add.image(940, 350, 'gameover');
     	this.sound.play('gameov');
+
+        this.startBtn = this.add.sprite(940, 500, 'startBtn').setInteractive();
+        this.startBtn.on('pointerdown', replay); // Start game on click.
     }
 /*##############################*/
 
@@ -360,6 +415,10 @@
     		this.add.image(940, 350, 'gameover');
     		msgText = this.add.text(700, 450, 'Collect all apples first', { fontSize: '36px', fill: '#000' });
     		this.sound.play('gameov');
+
+            this.startBtn = this.add.sprite(940, 550, 'startBtn').setInteractive();
+
+            this.startBtn.on('pointerdown', replay); // Start game on click.
     		}
     }
 /*#######################################*/
@@ -375,6 +434,14 @@
     		window.location.replace("level2.html");
     }
 /*#########################################*/
+
+    
+/*--------Replay button---------*/
+    function replay()
+    {
+        window.location.replace("level1.html");
+    }
+/*##############################*/
 
 
 /*-------Responsive Window Function--------*/   
