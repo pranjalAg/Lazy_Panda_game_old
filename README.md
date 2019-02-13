@@ -8,3 +8,6 @@ https://lazypandagame.github.io/
 
 For Updated repository of the game--->>
 https://github.com/lazypandagame
+
+Link to Phaser--->>
+https://phaser.io/
