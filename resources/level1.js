@@ -1,33 +1,3 @@
-<!--Lazy panda game which is created using phaser framework and is responsive according to size of web browser-->
-<!doctype html> 
-<html lang="en"> 
-<head> 
-    <meta charset="UTF-8" />
-    <title>Lazy Panda - Level 1</title>
-    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
-    <style type="text/css">
-        body {
-            display: inline-block;
-            margin: 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-         }   	
-
-       
-        h1{
-        	text-align: center;
-        	text-decoration: strong;
-        	font-family: helvetica;
-        }
-    </style>
-</head>
-<body>
-<h1>LEVEL 1</h1>
-<script src="resources/level1.js"></script>
-<!-- <script type="text/javascript">
-
     var config = {
         type: Phaser.AUTO,
         width: 2000,
@@ -463,8 +433,3 @@
         }
 	}
 /*##########################################*/	
-
-</script> -->
-
-</body>
-</html>
