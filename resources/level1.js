@@ -1,3 +1,4 @@
+  //the event occurred
     var config = {
         type: Phaser.AUTO,
         width: 2000,
